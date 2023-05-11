@@ -23,13 +23,13 @@ class BrickOrderingServiceTest {
 
     @Test
     void addBrickOrder() {
-        Long orderReference = 321L;
-        Integer numBricks = 28;
+        int orderReference = 21;
+        int numBricks = 28;
         BrickOrderEntity savedBrickOrderEntity = new BrickOrderEntity(orderReference, numBricks);
 
         given(brickOrdersRepository.save(any(BrickOrderEntity.class))).willReturn(savedBrickOrderEntity);
 
-        assertThat(brickOrderingService.addBrickOrder(savedBrickOrderEntity)).isEqualTo(orderReference);
-        verify(brickOrdersRepository).save(savedBrickOrderEntity);
+        assertThat(brickOrderingService.addBrickOrder(numBricks)).isEqualTo(orderReference);
+        verify(brickOrdersRepository).save(any());
     }
 }

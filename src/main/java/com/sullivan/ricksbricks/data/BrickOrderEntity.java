@@ -1,20 +1,19 @@
 package com.sullivan.ricksbricks.data;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Table(name = "orders")
 @NoArgsConstructor
 @AllArgsConstructor
+@RequiredArgsConstructor
 @Data
 @Entity
 public class BrickOrderEntity {
     @Id
-    private Long orderReference;
-    private Integer numberOfBricksOrdered;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int orderReference;
+    @NonNull
+    private int numberOfBricksOrdered;
 }

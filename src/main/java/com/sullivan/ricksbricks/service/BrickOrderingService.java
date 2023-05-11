@@ -14,8 +14,9 @@ public class BrickOrderingService {
         this.brickOrdersRepository = brickOrdersRepository;
     }
 
-    public Long addBrickOrder(BrickOrderEntity brickOrder) {
-        BrickOrderEntity savedEntity = brickOrdersRepository.save(brickOrder);
+    public int addBrickOrder(int numberOfBricks) {
+        BrickOrderEntity brickOrderEntity = new BrickOrderEntity(numberOfBricks);
+        BrickOrderEntity savedEntity = brickOrdersRepository.save(brickOrderEntity);
         return savedEntity.getOrderReference();
     }
 }

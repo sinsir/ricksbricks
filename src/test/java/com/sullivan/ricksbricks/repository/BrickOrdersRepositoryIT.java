@@ -15,14 +15,14 @@ class BrickOrdersRepositoryIT {
 
     @Test
     void testSave() {
-        Long orderReference = 321L;
-        Integer numBricks = 28;
+        int numBricks = 28;
 
-        brickOrdersRepository.save(new BrickOrderEntity(orderReference, numBricks));
+        BrickOrderEntity savedEntity = brickOrdersRepository.save(new BrickOrderEntity(numBricks));
         assertThat(brickOrdersRepository.findAll().size()).isEqualTo(1);
+        assertThat(savedEntity.getOrderReference()).isEqualTo(1);
 
-        Long orderReference2 = 123L;
-        brickOrdersRepository.save(new BrickOrderEntity(orderReference2, numBricks));
+        savedEntity = brickOrdersRepository.save(new BrickOrderEntity(numBricks));
         assertThat(brickOrdersRepository.findAll().size()).isEqualTo(2);
+        assertThat(savedEntity.getOrderReference()).isEqualTo(2);
     }
 }
