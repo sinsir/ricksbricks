@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
-class BrickOrdersRepositoryIT {
+class BrickOrdersRepositoryIntegrationTest {
 
     @Autowired
     private BrickOrdersRepository brickOrdersRepository;

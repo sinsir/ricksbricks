@@ -1,5 +1,7 @@
 package com.sullivan.ricksbricks.controllers;
 
+import com.sullivan.ricksbricks.error.BrickOrderNotFoundException;
+import com.sullivan.ricksbricks.model.BrickOrderResponse;
 import com.sullivan.ricksbricks.service.BrickOrderingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,10 +13,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 public class BrickOrderControllerTest {
+
+    private static final int ORDER_REFERENCE = 123;
+    private static final int NUMBER_OF_BRICKS = 732;
 
     @Mock
     private BrickOrderingService brickOrderingService;
@@ -29,12 +35,27 @@ public class BrickOrderControllerTest {
 
     @Test
     public void addBrickOrder() {
-        int orderReference = 123;
-        int numberOfBricks = 732;
-        given(brickOrderingService.addBrickOrder(numberOfBricks)).willReturn(orderReference);
+        given(brickOrderingService.addBrickOrder(NUMBER_OF_BRICKS)).willReturn(ORDER_REFERENCE);
 
-        Map<String, Integer> controllerOrderReference = brickOrderController.addBrickOrder(numberOfBricks);
+        Map<String, Integer> controllerOrderReference = brickOrderController.addBrickOrder(NUMBER_OF_BRICKS);
 
-        assertThat(controllerOrderReference.get("orderReference")).isEqualTo(orderReference);
+        assertThat(controllerOrderReference.get("orderReference")).isEqualTo(ORDER_REFERENCE);
+    }
+
+    @Test
+    public void getBrickOrder() {
+        given(brickOrderingService.getBrickOrder(ORDER_REFERENCE)).willReturn(Map.of(ORDER_REFERENCE,NUMBER_OF_BRICKS));
+
+        BrickOrderResponse brickOrder = brickOrderController.getBrickOrder(ORDER_REFERENCE);
+
+        assertThat(brickOrder.getOrderReference()).isEqualTo(ORDER_REFERENCE);
+        assertThat(brickOrder.getNumberOfBricksOrdered()).isEqualTo(NUMBER_OF_BRICKS);
+    }
+
+    @Test
+    public void getBrickOrderNoOrderFound() {
+        given(brickOrderingService.getBrickOrder(ORDER_REFERENCE)).willThrow(BrickOrderNotFoundException.class);
+
+        assertThrows(BrickOrderNotFoundException.class, () -> brickOrderController.getBrickOrder(ORDER_REFERENCE));
     }
 }
