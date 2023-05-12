@@ -1,6 +1,5 @@
 package com.sullivan.ricksbricks.controllers;
 
-import com.sullivan.ricksbricks.model.BrickOrderResponse;
 import com.sullivan.ricksbricks.service.BrickOrderingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
