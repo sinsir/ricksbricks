@@ -16,6 +16,7 @@ import static com.sullivan.ricksbricks.util.TestConstants.INSERT_TEST_DATA_SCRIP
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -49,8 +50,18 @@ public class BrickOrderControllerIntegrationTest {
                 .andExpect(jsonPath("$.orderReference", is((orderReference2))))
                 .andReturn();
 
-        assertThat(brickOrdersRepository.findById(orderReference1).get().getNumberOfBricksOrdered()).isEqualTo(brickQuantityOrder1);
-        assertThat(brickOrdersRepository.findById(orderReference2).get().getNumberOfBricksOrdered()).isEqualTo(brickQuantityOrder2);
+        assertThat(brickOrdersRepository.findById(orderReference1).get().getNumberOfBricksOrdered())
+                .isEqualTo(brickQuantityOrder1);
+        assertThat(brickOrdersRepository.findById(orderReference2).get().getNumberOfBricksOrdered())
+                .isEqualTo(brickQuantityOrder2);
+    }
+
+    @Test
+    public void testAddBrickOrderInvalidBrickSizeReturns400() throws Exception {
+
+        mockMvc.perform(MockMvcRequestBuilders.post(String.format("/order/bricks/%s", 0)))
+                .andExpect(status().is(BAD_REQUEST.value()))
+                .andReturn();
     }
 
     @ParameterizedTest
@@ -66,7 +77,7 @@ public class BrickOrderControllerIntegrationTest {
     }
 
     @Test
-    public void testGetBrickOrderReturnsEmptyBrickOrderResponseWhenOrderReferenceNotFound() throws Exception {
+    public void testGetBrickOrderReturns404WhenOrderReferenceNotFound() throws Exception {
 
         int nonExistentOrderReference = 8765;
 
@@ -82,15 +93,32 @@ public class BrickOrderControllerIntegrationTest {
         int pageNumber = 1;
         int expectedOrderNumber1 = 1;
         int expectedOrderNumber2 = 2;
+        int expectedOrderNumber3 = 3;
+        int expectedOrderNumber4 = 4;
 
         int expectedNumBricks1 = 345;
         int expectedNumBricks2 = 999;
+        int expectedNumBricks3 = 2;
+        int expectedNumBricks4 = 3465;
 
         mockMvc.perform(MockMvcRequestBuilders.get(String.format("/order/bricks?pageNumber=%s", pageNumber)))
                 .andExpect(status().is(OK.value()))
                 .andExpect((jsonPath("$.orders").isArray()))
-                .andExpect(jsonPath("$.orders[*].orderReference", containsInAnyOrder(expectedOrderNumber1, expectedOrderNumber2)))
-                .andExpect(jsonPath("$.orders[*].numberOfBricksOrdered", containsInAnyOrder(expectedNumBricks1, expectedNumBricks2)))
+                .andExpect(jsonPath("$.orders[*].orderReference",
+                        containsInAnyOrder(expectedOrderNumber1, expectedOrderNumber2)))
+                .andExpect(jsonPath("$.orders[*].numberOfBricksOrdered",
+                        containsInAnyOrder(expectedNumBricks1, expectedNumBricks2)))
+                .andReturn();
+
+        pageNumber = 2;
+
+        mockMvc.perform(MockMvcRequestBuilders.get(String.format("/order/bricks?pageNumber=%s", pageNumber)))
+                .andExpect(status().is(OK.value()))
+                .andExpect((jsonPath("$.orders").isArray()))
+                .andExpect(jsonPath("$.orders[*].orderReference",
+                        containsInAnyOrder(expectedOrderNumber3, expectedOrderNumber4)))
+                .andExpect(jsonPath("$.orders[*].numberOfBricksOrdered",
+                        containsInAnyOrder(expectedNumBricks3, expectedNumBricks4)))
                 .andReturn();
     }
 }
