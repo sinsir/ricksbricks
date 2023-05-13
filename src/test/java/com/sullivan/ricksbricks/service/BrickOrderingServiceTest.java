@@ -2,13 +2,17 @@ package com.sullivan.ricksbricks.service;
 
 import com.sullivan.ricksbricks.data.BrickOrderEntity;
 import com.sullivan.ricksbricks.error.BrickOrderNotFoundException;
+import com.sullivan.ricksbricks.repository.BrickOrdersPagingRepository;
 import com.sullivan.ricksbricks.repository.BrickOrdersRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,6 +30,13 @@ class BrickOrderingServiceTest {
     public static final BrickOrderEntity BRICK_ORDER_ENTITY = new BrickOrderEntity(ORDER_REFERENCE, NUM_BRICKS);
     @Mock
     private BrickOrdersRepository brickOrdersRepository;
+
+    @Mock
+    private Page<BrickOrderEntity> page;
+
+    @Mock
+    private BrickOrdersPagingRepository brickOrdersPagingRepository;
+
     @InjectMocks
     private BrickOrderingService brickOrderingService;
 
@@ -53,6 +64,26 @@ class BrickOrderingServiceTest {
         assertThrows(BrickOrderNotFoundException.class, () -> brickOrderingService.getBrickOrder(ORDER_REFERENCE));
 
         verify(brickOrdersRepository).findById(ORDER_REFERENCE);
+    }
 
+    @Test
+    void testGetBrickOrdersForPage() {
+        int orderRef1 = 1;
+        int orderRef2 = 2;
+
+        int numBricksOrdered1 = 31;
+        int numBricksOrdered2 = 666;
+
+        List<BrickOrderEntity> brickOrderEntities =
+                List.of(new BrickOrderEntity(orderRef1, numBricksOrdered1),
+                        new BrickOrderEntity(orderRef2, numBricksOrdered2));
+
+        given(page.stream()).willReturn(brickOrderEntities.stream());
+        given(brickOrdersPagingRepository.findAll(any(Pageable.class))).willReturn(page);
+
+        Map<Integer, Integer> brickOrdersForPage = brickOrderingService.getBrickOrdersForPage(1);
+
+        assertThat(brickOrdersForPage.keySet().containsAll(List.of(orderRef1, orderRef2))).isTrue();
+        assertThat(brickOrdersForPage.values().containsAll(List.of(numBricksOrdered1, numBricksOrdered2))).isTrue();
     }
 }

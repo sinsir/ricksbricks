@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -57,5 +58,20 @@ public class BrickOrderControllerTest {
         given(brickOrderingService.getBrickOrder(ORDER_REFERENCE)).willThrow(BrickOrderNotFoundException.class);
 
         assertThrows(BrickOrderNotFoundException.class, () -> brickOrderController.getBrickOrder(ORDER_REFERENCE));
+    }
+
+    @Test
+    public void getAllBrickOrders() {
+        Map<Integer, Integer> orders = Map.of(1, 123, 2, 456, 3, 789);
+        given(brickOrderingService.getBrickOrdersForPage(0)).willReturn(orders);
+
+        List<BrickOrderResponse> allBrickOrders = brickOrderController.getAllBrickOrders(1).getOrders();
+
+        assertThat(allBrickOrders.size()).isEqualTo(orders.size());
+
+        allBrickOrders.forEach(brickOrderResponse ->
+                assertThat(brickOrderResponse.getNumberOfBricksOrdered())
+                    .isEqualTo(
+                            orders.get(brickOrderResponse.getOrderReference())) );
     }
 }

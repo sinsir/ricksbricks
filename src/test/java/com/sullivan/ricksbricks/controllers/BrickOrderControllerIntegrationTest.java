@@ -11,7 +11,10 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static com.sullivan.ricksbricks.util.TestConstants.DELETE_TEST_DATA;
+import static com.sullivan.ricksbricks.util.TestConstants.INSERT_TEST_DATA_SCRIPT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
@@ -22,8 +25,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc(addFilters = false)
 public class BrickOrderControllerIntegrationTest {
 
-    private static final String INSERT_TEST_DATA_SCRIPT = "classpath:sql/insertTestOrders.sql";
-    private static final String DELETE_TEST_DATA = "classpath:sql/deleteTestOrders.sql";
     @Autowired
     private MockMvc mockMvc;
 
@@ -71,6 +72,25 @@ public class BrickOrderControllerIntegrationTest {
 
         mockMvc.perform(MockMvcRequestBuilders.get(String.format("/order/bricks/%s", nonExistentOrderReference)))
                 .andExpect(status().is(NOT_FOUND.value()))
+                .andReturn();
+    }
+
+    @Test
+    @Sql({DELETE_TEST_DATA, INSERT_TEST_DATA_SCRIPT})
+    public void testGetAllBrickOrders() throws Exception {
+
+        int pageNumber = 1;
+        int expectedOrderNumber1 = 1;
+        int expectedOrderNumber2 = 2;
+
+        int expectedNumBricks1 = 345;
+        int expectedNumBricks2 = 999;
+
+        mockMvc.perform(MockMvcRequestBuilders.get(String.format("/order/bricks?pageNumber=%s", pageNumber)))
+                .andExpect(status().is(OK.value()))
+                .andExpect((jsonPath("$.orders").isArray()))
+                .andExpect(jsonPath("$.orders[*].orderReference", containsInAnyOrder(expectedOrderNumber1, expectedOrderNumber2)))
+                .andExpect(jsonPath("$.orders[*].numberOfBricksOrdered", containsInAnyOrder(expectedNumBricks1, expectedNumBricks2)))
                 .andReturn();
     }
 }
